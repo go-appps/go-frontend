@@ -31,7 +31,7 @@ class SearchBar extends React.Component{
             })
         });
         
-        //this.props.history.push(`/maps/${locationName}`);
+        //this.props.history.push(`/maps/${locationName}`); 
     };
      
     render(){
