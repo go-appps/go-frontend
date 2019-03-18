@@ -1,45 +1,64 @@
 import React from "react";
-import TextField from '@material-ui/core/TextField';
-import Store from "./state/Store";
 
 class SearchBar extends React.Component{
 
-    constructor(){
+    constructor(props){
+        super(props);
         this.state = {
-            search: Store.state.destination,
-            value: ""
+            isLoaded: true,
+            items: [],
         }
     }
 
-    destinationRef = React.createRef();
-
-    goToMaps = (event) => {
-        event.preventDefault();
-        alert("SIDD IS A SCHMUCK");
-    };
-
+    myInput = React.createRef();
     
+    handleSubmit = (event) => {
+        // 1. stop form from submitting
+        event.preventDefault();
+        // 2. get the text from that input
+        const destination = this.myInput.current.value;
+        
+        this.setState({
+            isLoaded: false
+        });  
 
+        fetch(`https://go-app-api.herokuapp.com/places/search?location=${destination}`)
+        .then(res => res.json())
+        .then(json => {
+            this.setState({
+                isLoaded: true,
+                items: json.predictions
+            })
+        });
+        
+        //this.props.history.push(`/maps/${locationName}`);
+    };
+     
     render(){
+        var {isLoaded, items} = this.state;
+
+        if(!isLoaded){
+            return (<div>Loading...</div>);
+        }
+
         return(
-        //     <form className = "destination-entry">
-        //     <input 
-        //     type='text' 
-        //     required placeholder='Enter Destination' 
-        //     ref={this.destinationRef}
-        //     />
-        //     <button type = "submit" onClick={this.goToMaps}>Search</button>
-        // </form>
-        <div>
-            <TextField
-                id="outlined-search"
-                label="Search field"
-                type="search"
-                className="searchBar"
-                margin="normal"
-                variant="outlined"
-            />
-        </div>
+            <div>
+                <form className="destination-entry" onSubmit={this.handleSubmit}>
+                    <input 
+                    type='text' 
+                    ref={this.myInput}
+                    required placeholder='Enter Destination' 
+                    />
+                    <button type="submit">Search</button>
+                </form>
+                <ul>
+                    {items.map(item => (
+                        <li key={item.id}>
+                            {item.place_id}
+                        </li>
+                    ))}
+                </ul>
+            </div>
         );
     }
 }
